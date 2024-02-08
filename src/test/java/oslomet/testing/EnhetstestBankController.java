@@ -1,14 +1,17 @@
 package oslomet.testing;
 
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import oslomet.testing.API.BankController;
 import oslomet.testing.DAL.BankRepository;
 import oslomet.testing.Models.Konto;
 import oslomet.testing.Models.Kunde;
+import oslomet.testing.Models.Transaksjon;
 import oslomet.testing.Sikkerhet.Sikkerhet;
 
 import java.util.ArrayList;
@@ -26,9 +29,33 @@ public class EnhetstestBankController {
     // denne skal testes
     private BankController bankController;
 
+    // TEST-METODE FOR hentTransaksjoner
+    @Test
+    //arrange
+    public void test_hentTransaksjoner(){
+        Transaksjon enTransaksjon = new Transaksjon(123, "2024.02.07", 100.00, "2024.02.08",
+                "ukespenger", "utført","12345678910");
+
+        when(sjekk.loggetInn()).thenReturn("12121212121");
+        
+        when(repository.hentTransaksjoner(anyString(), anyString(), anyString())).thenReturn(enTransaksjon);
+        
+        //act 
+        Transaksjon resultat = bankController.hentTransaksjoner("12345678910","2024.02.07","2024.02.08");
+        
+        //assert 
+        assertEquals(enTransaksjon, resultat);
+    }
+
     @Mock
     // denne skal Mock'es
     private BankRepository repository;
+    @BeforeEach
+    public void setUp(){
+        MockitoAnnotations.openMocks(this);
+    }
+
+
 
     @Mock
     // denne skal Mock'es
