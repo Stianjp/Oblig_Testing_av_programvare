@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import oslomet.testing.API.BankController;
@@ -29,32 +30,31 @@ public class EnhetstestBankController {
     // denne skal testes
     private BankController bankController;
 
-    // TEST-METODE FOR hentTransaksjoner
-    @Test
-    //arrange
-    public void test_hentTransaksjoner(){
-        Transaksjon enTransaksjon = new Transaksjon(123, "2024.02.07", 100.00, "2024.02.08",
-                "ukespenger", "utført","12345678910");
 
-        when(sjekk.loggetInn()).thenReturn("12121212121");
-        
-        when(repository.hentTransaksjoner(anyString(), anyString(), anyString())).thenReturn(enTransaksjon);
-        
-        //act 
-        Transaksjon resultat = bankController.hentTransaksjoner("12345678910","2024.02.07","2024.02.08");
-        
-        //assert 
-        assertEquals(enTransaksjon, resultat);
+    @Test
+    public void test_hentTransaksjonerOK(){ // TEST-METODE FOR hentTransaksjoner
+        //arrange lager en fiktiv transaksjon
+        String kontoNr = "123456789";
+        String fraDato = "2024.02.07";
+        String tilDato = "2024.02.08";
+        String personnummer = "111111111";
+
+        Konto test_Konto = new Konto();
+        // Setter opp forventede verdier mot mock-objektene
+        when(sjekk.loggetInn()).thenReturn(personnummer);
+        when(repository.hentTransaksjoner(kontoNr, fraDato,tilDato)).thenReturn(test_Konto);
+
+        //act - utfører handlingen som testes
+        Konto resultat = bankController.hentTransaksjoner(kontoNr, fraDato, tilDato);
+
+        //assert - verifiserer
+        assertEquals(test_Konto, resultat, "Resultatene stemmer ikke med forventet resultat");
     }
+
 
     @Mock
     // denne skal Mock'es
     private BankRepository repository;
-    @BeforeEach
-    public void setUp(){
-        MockitoAnnotations.openMocks(this);
-    }
-
 
 
     @Mock
