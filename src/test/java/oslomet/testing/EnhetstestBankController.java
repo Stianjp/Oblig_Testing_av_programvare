@@ -16,6 +16,7 @@ import oslomet.testing.Models.Transaksjon;
 import oslomet.testing.Sikkerhet.Sikkerhet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,28 +31,6 @@ public class EnhetstestBankController {
     // denne skal testes
     private BankController bankController;
 
-
-    @Test
-    public void test_hentTransaksjonerOK(){ // TEST-METODE FOR hentTransaksjoner
-        //arrange lager en fiktiv transaksjon
-        String kontoNr = "123456789";
-        String fraDato = "2024.02.07";
-        String tilDato = "2024.02.08";
-        String personnummer = "111111111";
-
-        Konto test_Konto = new Konto();
-        // Setter opp forventede verdier mot mock-objektene
-        when(sjekk.loggetInn()).thenReturn(personnummer);
-        when(repository.hentTransaksjoner(kontoNr, fraDato,tilDato)).thenReturn(test_Konto);
-
-        //act - utfører handlingen som testes
-        Konto resultat = bankController.hentTransaksjoner(kontoNr, fraDato, tilDato);
-
-        //assert - verifiserer
-        assertEquals(test_Konto, resultat, "Resultatene stemmer ikke med forventet resultat");
-    }
-
-
     @Mock
     // denne skal Mock'es
     private BankRepository repository;
@@ -60,6 +39,65 @@ public class EnhetstestBankController {
     @Mock
     // denne skal Mock'es
     private Sikkerhet sjekk;
+
+    @Test
+    public void test_hentTransaksjonerOK(){ // ENHETSTEST FOR hentTransaksjoner
+        //arrange lager to fiktive transaksjoner
+        List<Transaksjon> transaksjoner = new ArrayList<>();
+
+        Transaksjon transaksjon1 = new Transaksjon(1, "123456789100", 1000, "2024-02-07", "Test betaling", "1", "1001123322323");
+        Transaksjon transaksjon2 = new Transaksjon(2, "987654321012", 49.9,"2024-02-02", "Grandiosa", "1", "001122334455");
+
+        //Legger de to fiktive transaksjonene i listen
+        transaksjoner.add(transaksjon1);
+        transaksjoner.add(transaksjon2);
+        Konto enKonto = new Konto("123565432", "12345654", 1000.00, "Sparekonto", "NOK", transaksjoner);
+
+
+        // Setter opp forventede verdier mot mock-objektene
+        when(sjekk.loggetInn()).thenReturn("010501213265");
+
+        when(repository.hentTransaksjoner(anyString(), anyString(), anyString())).thenReturn(enKonto);
+
+        //act - utfører handlingen som testes
+        Konto resultat = bankController.hentTransaksjoner("1001123322323", "2024-02-07", "2024-02-08");
+
+        //assert - verifiserer
+        assertEquals(enKonto, resultat, "Feil i hentTransaksjoner");
+    }
+    @Test
+    public void hentTransaksjoner_IkkeLoggetInn(){ //Enhetstest FOR hentTransaksjoner_IkkeLoggetInn
+        //arrange
+
+        // Setter opp forventede verdier mot mock-objektene
+        when(sjekk.loggetInn()).thenReturn(null);
+
+
+        //act - utfører handlingen som testes
+        Konto resultat = bankController.hentTransaksjoner(null, null, null);
+
+        //assert - verifiserer
+        assertNull(resultat);
+    }
+    @Test
+    public void test_hentKonti(){ // ENHETSTEST FOR hentKonti
+        //arrange
+        List<Konto> konti = new ArrayList<>();
+        Konto konti1 = new Konto("12345654", "1234565432", 420, "Lønnskonto", "EUR", null);
+        Konto konti2 = new Konto("12665654", "1234565532", 720, "Sparekonto", "NOK", null);
+
+        konti.add(konti1);
+        konti.add(konti2);
+
+        when(sjekk.loggetInn()).thenReturn("345654345654");
+        when(repository.hentKonti(anyString())).thenReturn(konti);
+
+        // act
+        List<Konto> resultat = bankController.hentKonti();
+        // assert
+        assertEquals(konti, resultat, "Feil i hentKonti");
+    }
+
 
     @Test
     public void hentKundeInfo_loggetInn() {
